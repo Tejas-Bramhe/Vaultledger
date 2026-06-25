@@ -1,13 +1,14 @@
 #include "user.h"
+#include <limits>
 
 using namespace std;
 
 int main() {
-    vector<User> users = User::loadFromJson();  // Load users from JSON at the start
+    User::loadFromJson();  // Load users from JSON at the start
 
     int choice;
     do {
-        cout << "\n==== WELCOME TO BANK MANAGEMENT SYSTEM ====\n";
+        cout << "\n==== WELCOME TO VAULTLEDGER ====\n";
         cout << "1. Create Account\n";
         cout << "2. Display Account\n";
         cout << "3. Modify Account\n";
@@ -17,13 +18,18 @@ int main() {
         cout << "7. Export Accounts to CSV\n";
         cout << "8. Exit\n";
         cout << "Enter your choice: ";
-        cin >> choice;
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            choice = -1;
+        }
 
         switch (choice) {
             case 1: {
                 User newUser;
                 newUser.createAccount();
-                users.push_back(newUser);  // Update local users list
+                users.push_back(newUser);  // Update global users list
+                User::saveToJson();        // Persist immediately
                 break;
             }
             case 2: {
@@ -68,8 +74,10 @@ int main() {
                 });
 
                 if (it != users.end()) {
-                    it->deleteAccount();
-                    users.erase(it);  // Remove from vector
+                    string accNum = it->getAccountNumber();
+                    users.erase(it);  // Remove from global vector
+                    User::saveToJson();  // Update JSON after deletion
+                    cout << "Account " << accNum << " deleted successfully." << endl;
                 } else {
                     cout << "Account Not Found!" << endl;
                 }
@@ -81,7 +89,12 @@ int main() {
                 cout << "Enter Account Number: ";
                 cin >> accNumber;
                 cout << "Enter Amount to Deposit: ";
-                cin >> amount;
+                if (!(cin >> amount)) {
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Invalid amount entered!" << endl;
+                    break;
+                }
 
                 auto it = find_if(users.begin(), users.end(), [&](const User& u) {
                     return u.getAccountNumber() == accNumber;
@@ -100,7 +113,12 @@ int main() {
                 cout << "Enter Account Number: ";
                 cin >> accNumber;
                 cout << "Enter Amount to Withdraw: ";
-                cin >> amount;
+                if (!(cin >> amount)) {
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Invalid amount entered!" << endl;
+                    break;
+                }
 
                 auto it = find_if(users.begin(), users.end(), [&](const User& u) {
                     return u.getAccountNumber() == accNumber;
@@ -118,7 +136,7 @@ int main() {
                 break;
             }
             case 8:
-                cout << "Exiting... Have a Nice Day!\n";
+                cout << "Exiting VaultLedger... Have a Nice Day!\n";
                 break;
             default:
                 cout << "Invalid choice! Please try again.\n";

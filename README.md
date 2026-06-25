@@ -1,152 +1,178 @@
-# Bank Management System
+# VaultLedger — Bank Management System
 ![Made with C++](https://img.shields.io/badge/Made%20with-C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows-lightgrey?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=for-the-badge)
 
-A lightweight and scalable **C++ console application** featuring core banking functionalities with structured data storage in **JSON** and **CSV**.
+A lightweight and scalable **Bank Management System** featuring a **C++ console application** and a **React web dashboard** backed by an **Express API server**, with structured data storage in **JSON** and **CSV**.
 
 
-## 📌 **Features**  
-✅ **Create Accounts** (Savings & Current)  
-✅ **View Account Details**  
-✅ **Modify Account (Name & Type)**  
-✅ **Deposit & Withdraw Money**  
-✅ **Delete Account**  
-✅ **Save & Load Data in JSON**  
-✅ **Export Data to CSV**  
+## 📌 **Features**
+✅ **Create Accounts** (Savings & Current)
+✅ **View Account Details**
+✅ **Modify Account (Name & Type)**
+✅ **Deposit & Withdraw Money**
+✅ **Transfer Money Between Accounts**
+✅ **Delete Account**
+✅ **Save & Load Data in JSON**
+✅ **Export Data to CSV**
+✅ **React Web Dashboard** with live API
 
 
-## 📜 **Table of Contents**  
-1. [Installation & Setup](#installation--setup)  
-2. [Usage Guide](#usage-guide)  
-3. [File & Directory Structure](#file--directory-structure)  
-4. [Code Explanation](#code-explanation)  
-5. [Data Storage Formats](#data-storage-formats)  
-6. [Error Handling](#error-handling)  
-7. [Contribution Guidelines](#contribution-guidelines)  
-8. [License](#license)  
-9. [Credits & Authors](#credits--authors)  
+## 📜 **Table of Contents**
+1. [Prerequisites](#prerequisites)
+2. [Running the Web App](#running-the-web-app)
+3. [Running the Console App](#running-the-console-app)
+4. [API Reference](#api-reference)
+5. [File & Directory Structure](#file--directory-structure)
+6. [Code Explanation](#code-explanation)
+7. [Data Storage Formats](#data-storage-formats)
+8. [Error Handling](#error-handling)
+9. [Contribution Guidelines](#contribution-guidelines)
 
 
-## ⚙️ **Installation & Setup**  
+## ⚙️ **Prerequisites**
 
-### **🔹 Prerequisites**  
-- **C++ Compiler** (GCC, Clang, MSVC, etc.)  
-- **C++17 or later**  
-- **JSON Library** ([nlohmann/json](https://github.com/nlohmann/json))  
+### **For the Web App**
+- [Node.js](https://nodejs.org/) **v18+** and npm
+- A modern web browser
 
-### **🔹 Steps to Run**  
-1️⃣ **Clone the Repository:**  
+### **For the Console App** *(optional)*
+- C++ Compiler (GCC, Clang, MSVC, etc.)
+- C++17 or later
+- [nlohmann/json](https://github.com/nlohmann/json) (already included in `include/json.hpp`)
+
+
+## 🌐 **Running the Web App**
+
+### **Quick Start**
+
+1️⃣ **Clone the Repository**
 ```sh
 git clone https://github.com/Mozeel-V/bank-management-system.git
 cd bank-management-system
 ```
 
-2️⃣ **Compile the Code:**  
+2️⃣ **Install Dependencies**
+```sh
+cd web-app
+npm install
+```
+
+3️⃣ **Start the Express API Server** *(runs on port 5000)*
+```sh
+npm run server
+```
+
+4️⃣ **Start the React Dev Server** *(open a new terminal, runs on port 5173)*
+```sh
+cd web-app
+npm run dev
+```
+
+5️⃣ **Open the App**
+
+Visit [http://localhost:5173](http://localhost:5173) in your browser.
+
+> [!NOTE]
+> The Vite dev server automatically proxies `/api` requests to the Express server on port 5000, so both servers must be running simultaneously.
+
+### **Production Build**
+
+To build and serve the app as a single process:
+
+```sh
+cd web-app
+npm run build
+npm start
+```
+
+This builds the React frontend into `web-app/dist/` and serves it through the Express server at [http://localhost:5000](http://localhost:5000).
+
+
+## 💻 **Running the Console App**
+
+1️⃣ **Compile the Code**
 ```sh
 g++ -o bank main.cpp src/user.cpp -std=c++17 -Iinclude
 ```
-OR 
-
+OR
 ```sh
 make
 ```
 
-3️⃣ **Run the Program:**  
+2️⃣ **Run the Program**
 ```sh
 ./bank
 ```
 OR
-
 ```sh
 make run
 ```
 
-4️⃣ **To Test the Program (optional):**
+3️⃣ **Run Tests** *(optional)*
 ```sh
 make test
 ```
 
-5️⃣ **Clear the Database and Executables after use:** 
+4️⃣ **Clean Build Artifacts & Data**
 ```sh
 make clean
 ```
 
-## 📖 **Usage Guide**  
+> [!IMPORTANT]
+> Both the console app and the web app share the same `data/accounts.json` file. Changes made in one are reflected in the other.
 
-### **1️⃣ Create an Account**  
-- The system prompts for **Name** and **Account Type** (Savings/Current).  
-- Generates a **unique account number** based on the date and a counter.  
 
-### **2️⃣ View Account Details**  
-```markdown
-1. Enter your account number.
-2. See Number, Name, Balance, and Type.
+## 📡 **API Reference**
+
+The Express server exposes the following REST endpoints:
+
+| Method   | Endpoint                  | Description                  | Body Parameters                                        |
+| -------- | ------------------------- | ---------------------------- | ------------------------------------------------------ |
+| `GET`    | `/api/accounts`           | List all accounts            | —                                                      |
+| `POST`   | `/api/accounts/create`    | Create a new account         | `{ "name": "...", "type": "Savings" \| "Current" }`    |
+| `POST`   | `/api/accounts/deposit`   | Deposit money                | `{ "accountNumber": "...", "amount": 100 }`            |
+| `POST`   | `/api/accounts/withdraw`  | Withdraw money               | `{ "accountNumber": "...", "amount": 50 }`             |
+| `POST`   | `/api/accounts/transfer`  | Transfer between accounts    | `{ "fromAccountNumber": "...", "toAccountNumber": "...", "amount": 100 }` |
+| `DELETE` | `/api/accounts/:id`       | Delete an account            | —                                                      |
+| `POST`   | `/api/accounts/export`    | Export all accounts to CSV   | —                                                      |
+
+
+## 📁 **File & Directory Structure**
 ```
-
-### **3️⃣ Deposit Money**  
-```markdown
-1. Enter account number.
-2. Enter deposit amount.
-3. Balance updates automatically.
-```
-
-### **4️⃣ Withdraw Money**  
-```markdown
-1. Enter account number.
-2. Enter withdrawal amount.
-3. If sufficient balance → Success.
-4. If not → Error message.
-```
-
-### **5️⃣ Modify Account**  
-```markdown
-1. Enter account number.
-2. Change Name & Account Type.
-3. Data is saved instantly.
-```
-
-### **6️⃣ Delete Account**  
-```markdown
-1. Enter account number.
-2. Confirm deletion.
-3. Account is removed from JSON file.
-```
-
-### **7️⃣ Export Accounts to CSV**  
-```markdown
-1. Select CSV export option.
-2. Data saved in `data/accounts.csv`.
-```
-
-
-## 📁 **File & Directory Structure**  
-```markdown
 Bank Management System/
 │
-├── .gitignore                 # Specifies files and directories that should be ignored by Git
-├── LICENSE                    # Open-source MIT license for the project
-├── README.md                  # Project description, installation, usage, and details
-├── Makefile                   # Instructions for building, cleaning and testing the project
-├── build/                     # Directory for future build artifacts
+├── .gitignore                 # Git ignore rules
+├── LICENSE                    # MIT license
+├── README.md                  # This file
+├── Makefile                   # Build rules for the C++ console app
+├── main.cpp                   # Console app entry point
 │
-├── data/                       # Directory containing data files (accounts.json, accounts.csv)
-│   ├── accounts.json
-│   └── accounts.csv
+├── data/                      # Shared data directory
+│   ├── accounts.json          # Account data (JSON)
+│   └── accounts.csv           # Exported CSV file
 │
-├── include/                    # Header files
-│   ├── json.hpp                # JSON library (external)
-│   └── user.h                  # User class definition
+├── include/                   # C++ header files
+│   ├── json.hpp               # nlohmann/json library
+│   └── user.h                 # User class definition
 │
-├── src/                        # Source files
-│   └── user.cpp                # User class implementation
-│ 
-├── tests/
-│   ├── catch.hpp               # Catch2 single header file
-│   └── user_test.cpp           # Comprehensive Unit Testing
+├── src/                       # C++ source files
+│   └── user.cpp               # User class implementation
 │
-└── main.cpp                    # Main program entry point
+├── tests/                     # C++ unit tests
+│   ├── catch.hpp              # Catch2 header
+│   └── user_test.cpp          # Unit tests
+│
+└── web-app/                   # React + Express web application
+    ├── package.json           # Node.js dependencies & scripts
+    ├── server.js              # Express API server
+    ├── vite.config.js         # Vite config with API proxy
+    ├── index.html             # HTML entry point
+    ├── public/                # Static assets
+    └── src/                   # React components & styles
 ```
 
 
@@ -167,11 +193,14 @@ Bank Management System/
   - `loadFromJson()` → Reads account data from JSON and updates the `users` list.
   - `exportToCSV()` → Exports all account data to `data/accounts.csv`.
 
-### **🔹 `getCurrentDate()` Function**
-- Returns the current date in `YYYYMMDD` format, which is used to generate unique account numbers by combining it with a static counter.
+### **🔹 Express API Server (server.js)**
+- Reads and writes to the shared `data/accounts.json` file.
+- Generates unique account numbers using a date-based prefix (`YYYYMMDD`) plus a sequential counter.
+- Serves the production React build from `web-app/dist/`.
 
-### **🔹 Static Counter**
-- A **static counter** is used to generate unique account numbers. This ensures that each account number is distinct and incremented automatically with every new account creation.
+### **🔹 React Frontend (web-app/src/)**
+- Vite-powered React 19 app.
+- Proxies `/api` requests to the Express server during development.
 
 
 ## 📂 **Data Storage Formats**
@@ -196,46 +225,34 @@ Account Number,Name,Balance,Type
 
 
 ## ❌ **Error Handling**
-✔ **Invalid Inputs** → If incorrect data is entered, prompts reappear for correction.  
-✔ **Insufficient Balance** → Withdrawals are blocked if the account has insufficient funds.  
+✔ **Invalid Inputs** → If incorrect data is entered, prompts reappear for correction.
+✔ **Insufficient Balance** → Withdrawals are blocked if the account has insufficient funds.
 ✔ **File Errors** → If JSON/CSV files fail to open, errors are displayed.
+✔ **API Errors** → The Express server returns appropriate HTTP status codes and error messages.
 
 
 ## 🔧 **Industry Readiness & Best Practices**
-- **Memory Efficiency**  
-  ✅ Uses a global `vector<User>` to store all users, avoiding redundant data loading.  
+- **Memory Efficiency**
+  ✅ Uses a global `vector<User>` to store all users, avoiding redundant data loading.
   ✅ A **static counter** for unique account number generation ensures efficient handling without conflicts.
 
-- **Modern C++ Practices**  
-  ✅ Structured serialization of objects using **nlohmann/json**.  
-  ✅ **RAII principles**: Destructor ensures proper memory management.  
+- **Modern C++ Practices**
+  ✅ Structured serialization of objects using **nlohmann/json**.
+  ✅ **RAII principles**: Destructor ensures proper memory management.
   ✅ No raw pointers—uses **smart memory management**.
 
-- **Scalability & Maintainability**  
-  ✅ **Enum-based account types**: Future-proof design with extendable account types.  
-  ✅ **Global `unordered_map<Type, std::string>`** allows for efficient lookup of account types.  
-  ✅ The code avoids dependency on compiler-specific features, ensuring broader compatibility.
+- **Web Architecture**
+  ✅ **Separation of concerns**: React frontend communicates with Express API.
+  ✅ **Vite** for fast HMR during development.
+  ✅ **Shared data layer**: Both console and web app use the same JSON storage.
 
-- **Performance Not Sacrificed**  
-  ✅ Efficient handling of large datasets using **JSON** for storage.  
-  ✅ Optimized file I/O with stream-based handling of file operations.
+- **Scalability & Maintainability**
+  ✅ **Enum-based account types**: Future-proof design with extendable account types.
+  ✅ **Global `unordered_map<Type, std::string>`** allows for efficient lookup of account types.
+  ✅ The code avoids dependency on compiler-specific features, ensuring broader compatibility.
 
 
 ## 👥 **Contribution Guidelines**
-✅ Fork the repository.  
-✅ Make changes in a separate branch.  
+✅ Fork the repository.
+✅ Make changes in a separate branch.
 ✅ Submit a pull request (PR) with a proper description of your changes.
-
-
-
-## 📜 **License**
-This project is **open-source** under the **MIT License**.
-
-
-## 🏆 **Credits & Authors**
-👨‍💻 **Developed By:** Mozeel Vanwani  
-🎓 **IIT Kharagpur | CSE**  
-
-
-
-

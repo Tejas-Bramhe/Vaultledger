@@ -1,7 +1,21 @@
 #include "user.h"
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <sys/stat.h>
+#endif
+
 using namespace std;
 
 vector<User> users;  // Global vector to store live User objects
+
+static void createDataDir() {
+#ifdef _WIN32
+    _mkdir("data");
+#else
+    mkdir("data", 0777);
+#endif
+}
 
 const unordered_map<Type, string> accountTypeMap = {
     {SAVINGS, "Savings"},
@@ -37,16 +51,13 @@ void User::createAccount() {
 
     int accTypeInput;
     cout << "Enter Account Type (0 for Savings, 1 for Current): ";
-    cin >> accTypeInput;
-
-    while (accTypeInput != 0 && accTypeInput != 1) {
+    while (!(cin >> accTypeInput) || (accTypeInput != 0 && accTypeInput != 1)) {
         cout << "Invalid choice! Enter 0 for Savings or 1 for Current: ";
-        cin >> accTypeInput;
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 
     account_type = static_cast<Type>(accTypeInput);
-    users.push_back(*this); // Adds to global users list
-    saveToJson();           // Updates JSON immediately
     cout << "Account " << account_number << " created Successfully!" << endl;
 }
 
@@ -94,31 +105,15 @@ void User::modifyAccount() {
     int accTypeInput;
     cout << "Current Account Type: " << accountTypeMap.at(account_type) << endl;
     cout << "Enter New Type (0 for Savings, 1 for Current): ";
-    cin >> accTypeInput;
-
-    while (accTypeInput != 0 && accTypeInput != 1) {
+    while (!(cin >> accTypeInput) || (accTypeInput != 0 && accTypeInput != 1)) {
         cout << "Invalid choice! Enter 0 for Savings or 1 for Current: ";
-        cin >> accTypeInput;
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 
     account_type = static_cast<Type>(accTypeInput);
     saveToJson();
     cout << "Account Details Updated Successfully!" << endl;
-}
-
-// Delete your account
-void User::deleteAccount() {
-    auto it = find_if(users.begin(), users.end(), [&](const User& u) {
-        return u.account_number == this->account_number;
-    });
-
-    if (it != users.end()) {
-        users.erase(it);
-        saveToJson();  // Update JSON after deletion
-        cout << "Account " << this->account_number << " deleted successfully." << endl;
-    } else {
-        cout << "Account Not Found!" << endl;
-    }
 }
 
 // Converts User object to JSON format
@@ -138,6 +133,7 @@ void User::saveToJson() {
         jArray.push_back(user.toJson());
     }
 
+    createDataDir();
     ofstream outFile("data/accounts.json");
     if (outFile) {
         outFile << jArray.dump(4); // Properly formatted JSON
@@ -152,29 +148,48 @@ void User::saveToJson() {
 vector<User> User::loadFromJson() {
     ifstream inFile("data/accounts.json");
     vector<User> loadedUsers;
+    int maxCounter = 0;
 
     if (inFile) {
         json jArray;
-        inFile >> jArray;
-        inFile.close();
+        try {
+            inFile >> jArray;
+            inFile.close();
 
-        for (const auto& jUser : jArray) {
-            User user;
-            user.account_number = jUser["account_number"];
-            user.user_name = jUser["user_name"];
-            user.account_balance = jUser["account_balance"];
+            for (const auto& jUser : jArray) {
+                User user;
+                user.account_number = jUser["account_number"];
+                user.user_name = jUser["user_name"];
+                user.account_balance = jUser["account_balance"];
 
-            // Reverse lookup for account type
-            for (const auto& [type, name] : accountTypeMap) {
-                if (name == jUser["account_type"]) {
-                    user.account_type = type;
-                    break;
+                // Reverse lookup for account type (C++11 standard iteration)
+                for (const auto& pair : accountTypeMap) {
+                    if (pair.second == jUser["account_type"]) {
+                        user.account_type = pair.first;
+                        break;
+                    }
                 }
-            }
 
-            loadedUsers.push_back(user);
+                // Safely parse the counter from account number to prevent conflicts
+                if (user.account_number.length() > 12) {
+                    try {
+                        int loadedCounter = std::stoi(user.account_number.substr(12));
+                        if (loadedCounter > maxCounter) {
+                            maxCounter = loadedCounter;
+                        }
+                    } catch (...) {
+                        // Ignore parsing errors for malformed account numbers
+                    }
+                }
+
+                loadedUsers.push_back(user);
+            }
+            User::counter = maxCounter;
+            cout << "Accounts loaded successfully from JSON." << endl;
+        } catch (...) {
+            cerr << "Error parsing accounts.json file. It might be empty or corrupted." << endl;
+            inFile.close();
         }
-        cout << "Accounts loaded successfully from JSON." << endl;
     } else {
         cout << "No previous account data found!" << endl;
     }
@@ -185,6 +200,7 @@ vector<User> User::loadFromJson() {
 
 // Exports all accounts to a CSV file
 void User::exportToCSV(const std::vector<User>& users) {
+    createDataDir();
     ofstream outFile("data/accounts.csv");
 
     if (outFile) {
