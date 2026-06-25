@@ -51,7 +51,7 @@ A lightweight and scalable **Bank Management System** featuring a **C++ console 
 
 1️⃣ **Clone the Repository**
 ```sh
-git clone https://github.com/Mozeel-V/bank-management-system.git
+git clone https://github.com/Tejas-Bramhe/Vaultledger.git
 cd bank-management-system
 ```
 
