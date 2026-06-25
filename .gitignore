@@ -20,6 +20,6 @@ bank
 *.d
 *.dep
 
-# Ignore JSON & CSV data files
-data/accounts.json
-data/accounts.csv
+# Ignore JSON & CSV data files (root level only)
+/data/accounts.json
+/data/accounts.csv

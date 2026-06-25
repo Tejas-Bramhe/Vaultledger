@@ -1,0 +1,14 @@
+[
+    {
+        "account_balance": 100,
+        "account_number": "0000202606242",
+        "account_type": "Current",
+        "user_name": "Jane Smith"
+    },
+    {
+        "account_number": "0000202606254",
+        "user_name": "Tejas",
+        "account_balance": 10,
+        "account_type": "Savings"
+    }
+]

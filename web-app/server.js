@@ -11,8 +11,14 @@ const PORT = process.env.PORT || 5000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const ACCOUNTS_FILE = path.resolve(__dirname, '../data/accounts.json');
-const CSV_FILE = path.resolve(__dirname, '../data/accounts.csv');
+const DATA_DIR = path.resolve(__dirname, 'data');
+const ACCOUNTS_FILE = path.join(DATA_DIR, 'accounts.json');
+const CSV_FILE = path.join(DATA_DIR, 'accounts.csv');
+
+// Ensure data directory exists on startup
+if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+}
 
 app.use(cors());
 app.use(express.json());
@@ -218,6 +224,11 @@ app.post('/api/accounts/export', (req, res) => {
     } else {
         res.status(500).json({ error: 'Failed to export CSV.' });
     }
+});
+
+// SPA catch-all: serve index.html for any non-API route
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 app.listen(PORT, () => {
